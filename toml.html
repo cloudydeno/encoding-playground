@@ -1,0 +1,140 @@
+
+<!doctype html>
+<meta charset="utf-8"/>
+
+<title>toml encoding playground</title>
+<h1>👨‍💻 toml encoding playground</h1>
+
+<form id="decode">
+  <div style="grid-area: input" class="input">
+    <textarea class="input-box" name="input" placeholder="TOML"></textarea>
+    <button type="submit">Parse!</button>
+  </div>
+
+  <div style="grid-area: lbl-A">
+    <h3>deno: /std/encoding</h3>
+    <h4>@0.92.0</h4>
+    <p><a href="https://deno.land/std@0.92.0/encoding/toml.ts">source</a></p>
+  </div>
+  <textarea style="grid-area: box-A" class="out" name="outA"
+    readonly placeholder="/std output"></textarea>
+
+  <div style="grid-area: lbl-B">
+    <h3>npm: toml</h3>
+    <h4>@3.0.0</h4>
+    <p>claims TOML 0.4.0 support</p>
+    <p>
+      <a href="https://github.com/BinaryMuse/toml-node/tree/v3.0.0">github</a>
+      |
+      <a href="https://www.npmjs.com/package/toml">npm</a>
+    </p>
+  </div>
+  <textarea style="grid-area: box-B" class="out" name="outB"
+    readonly placeholder="toml.js output"></textarea>
+
+  <div style="grid-area: lbl-C">
+    <h3>npm: @iarna/toml</h3>
+    <h4>@2.2.5</h4>
+    <p>claims TOML 0.5.0 support</p>
+    <p>
+      <a href="https://github.com/iarna/iarna-toml/tree/v2.2.5">github</a>
+      |
+      <a href="https://www.npmjs.com/package/@iarna/toml">npm</a>
+    </p>
+  </div>
+  <textarea style="grid-area: box-C" class="out" name="outC"
+    readonly placeholder="@iarna/toml output"></textarea>
+</form>
+
+<script type="module">
+  import {parse as parseA} from './deno_std/0.92.0/toml.js';
+  import {parse as parseB} from 'https://cdn.skypack.dev/toml@3.0.0';
+  import {parse as parseC} from 'https://cdn.esm.sh/@iarna/toml@2.2.5';
+
+  const inputBox = document.querySelector('[name=input]');
+  const form = document.querySelector('form');
+  const outputs = [
+    [ parseA, document.querySelector('[name=outA]') ],
+    [ parseB, document.querySelector('[name=outB]') ],
+    [ parseC, document.querySelector('[name=outC]') ],
+  ];
+
+  function parseNow(raw) {
+    for (const [parse, outbox] of outputs) {
+      Promise.resolve(raw)
+        .then(parse)
+        .then(
+          data => JSON.stringify(data, null, 2),
+          err => err.stack || err)
+        .then(
+          text => outbox.value = text);
+    }
+  }
+
+  form.addEventListener('submit', evt => {
+    evt.preventDefault();
+    try {
+      parseNow(inputBox.value);
+    } catch (err) {
+      alert(err);
+    }
+  });
+
+  inputBox.focus();
+  inputBox.addEventListener('paste', evt => {
+    try {
+      inputBox.value = '';
+      parseNow(evt.clipboardData.getData('text'));
+    } catch (err) {
+      alert(err);
+    }
+  });
+</script>
+
+<style type="text/css">
+  body {
+    background-color: #333;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 2em;
+    box-sizing: border-box;
+    min-width: 40em;
+    font-family: monospace;
+  }
+  h1 {
+    margin: 0.3em 1em;
+    color: #999;
+  }
+  form {
+    display: grid;
+    grid-gap: 1em;
+    grid-template-columns: 1fr 15em 2fr;
+    /* grid-template-rows: 1fr 1fr 1fr; */
+    grid-template-areas: "input lbl-A box-A" "input lbl-B box-B" "input lbl-C box-C" ;
+
+    margin: 1em;
+    flex: 1;
+  }
+  .input {
+    display: flex;
+    flex-direction: column;
+  }
+  .input-box {
+    flex: 1;
+    margin-bottom: 1em;
+  }
+  textarea {
+    background-color: #111;
+    color: #fff;
+    padding: 0.2em 0.5em;
+  }
+  button {
+    background-color: #555;
+    font-family: inherit;
+    color: #fff;
+    padding: 0.5em;
+  }
+</style>
