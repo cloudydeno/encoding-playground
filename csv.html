@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8" />
 <link rel="stylesheet" href="./style.css" />
-<title>toml encoding playground</title>
+<title>csv encoding playground</title>
 
 <style type="text/css">
   form {
@@ -38,7 +38,7 @@
   }
 </style>
 
-<h1>👨‍💻 toml encoding playground</h1>
+<h1>👨‍💻 csv encoding playground</h1>
 <form id="decode">
   <div style="grid-area: input" class="input">
     <textarea class="input-box" name="input" placeholder="loading parsers..."></textarea>
@@ -48,36 +48,30 @@
   <div style="grid-area: lbl-A">
     <h3>deno: /std/encoding</h3>
     <h4>@0.92.0</h4>
-    <p><a href="https://deno.land/std@0.92.0/encoding/toml.ts">source</a></p>
+    <p><a href="https://deno.land/std@0.92.0/encoding/csv.ts">source</a></p>
   </div>
   <textarea style="grid-area: box-A" class="out" name="outA"
     readonly placeholder="/std output"></textarea>
 
   <div style="grid-area: lbl-B">
-    <h3>npm: toml</h3>
-    <h4>@3.0.0</h4>
-    <p>claims TOML 0.4.0 support</p>
+    <h3>npm: csv-parse</h3>
+    <h4>@4.15.3</h4>
     <p>
-      <a href="https://github.com/BinaryMuse/toml-node/tree/v3.0.0">github</a>
-      |
-      <a href="https://www.npmjs.com/package/toml">npm</a>
+      <a href="https://www.npmjs.com/package/csv-parse">npm</a>
     </p>
   </div>
   <textarea style="grid-area: box-B" class="out" name="outB"
-    readonly placeholder="toml.js output"></textarea>
+    readonly placeholder="csv-parse output"></textarea>
 
   <div style="grid-area: lbl-C">
-    <h3>npm: @iarna/toml</h3>
-    <h4>@2.2.5</h4>
-    <p>claims TOML 0.5.0 support</p>
+    <h3>npm: papaparse</h3>
+    <h4>@5.3.0</h4>
     <p>
-      <a href="https://github.com/iarna/iarna-toml/tree/v2.2.5">github</a>
-      |
-      <a href="https://www.npmjs.com/package/@iarna/toml">npm</a>
+      <a href="https://www.npmjs.com/package/papaparse">npm</a>
     </p>
   </div>
   <textarea style="grid-area: box-C" class="out" name="outC"
-    readonly placeholder="@iarna/toml output"></textarea>
+    readonly placeholder="papaparse output"></textarea>
 </form>
 
 <script>
@@ -90,9 +84,11 @@
 </script>
 
 <script type="module">
-  import { parse as parseA } from './deno_std/0.92.0/toml.js';
-  import { parse as parseB } from 'https://cdn.skypack.dev/toml@3.0.0';
-  import { parse as parseC } from 'https://cdn.esm.sh/@iarna/toml@2.2.5';
+  import { parse as parseA } from './deno_std/0.92.0/csv.js';
+  import {} from 'https://cdn.jsdelivr.net/npm/csv-parse@4.15.3/lib/browser/index.js';
+  const parseB = text => new Promise((ok, err) => parse(text, (error, data) => error ? err(error) : ok(data)));
+  import papaparse from 'https://esm.sh/papaparse@5.3.0';
+  const parseC = text => papaparse.parse(text)?.data;
 
   import { bindFormState, registerParsers } from './form.js';
 
