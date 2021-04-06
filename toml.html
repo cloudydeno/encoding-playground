@@ -1,72 +1,49 @@
 
 <!doctype html>
 <meta charset="utf-8" />
+<link rel="stylesheet" href="./style.css" />
 <title>toml encoding playground</title>
 
 <style type="text/css">
-  body {
-    background-color: #333;
-    color: #fff;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    padding: 2em;
-    box-sizing: border-box;
-    min-width: 40em;
-    font-family: monospace;
-  }
-  h1 {
-    margin: 0.3em 1em;
-    color: #999;
-  }
   form {
-    display: grid;
-    grid-gap: 1em;
-    grid-template-areas: "input" "lbl-A" "box-A" "lbl-B" "box-B" "lbl-C" "box-C";
-
-    margin: 1em;
-    flex: 1;
+    grid-template-areas:
+      "input"
+      "lbl-A"
+      "box-A"
+      "lbl-B"
+      "box-B"
+      "lbl-C"
+      "box-C"
+    ;
   }
   @media (min-width: 600px) {
     form {
       grid-template-columns: 15em 1fr;
-      grid-template-areas: "input input" "lbl-A box-A" "lbl-B box-B" "lbl-C box-C";
+      grid-template-areas:
+        "input input"
+        "lbl-A box-A"
+        "lbl-B box-B"
+        "lbl-C box-C"
+      ;
     }
   }
   @media (min-width: 900px) {
     form {
       grid-template-columns: 1fr 15em 2fr;
-      grid-template-areas: "input lbl-A box-A" "input lbl-B box-B" "input lbl-C box-C";
+      grid-template-areas:
+        "input lbl-A box-A"
+        "input lbl-B box-B"
+        "input lbl-C box-C"
+      ;
     }
-  }
-  .input {
-    display: flex;
-    flex-direction: column;
-  }
-  .input-box {
-    flex: 1;
-    margin-bottom: 1em;
-  }
-  textarea {
-    background-color: #111;
-    color: #fff;
-    padding: 0.2em 0.5em;
-    min-height: 5em;
-  }
-  button {
-    background-color: #555;
-    font-family: inherit;
-    color: #fff;
-    padding: 0.5em;
   }
 </style>
 
 <h1>👨‍💻 toml encoding playground</h1>
 <form id="decode">
   <div style="grid-area: input" class="input">
-    <textarea class="input-box" name="input" placeholder="TOML"></textarea>
-    <button type="submit">Parse!</button>
+    <textarea class="input-box" name="input" placeholder="loading parsers..."></textarea>
+    <button type="submit" disabled>Parse!</button>
   </div>
 
   <div style="grid-area: lbl-A">
@@ -104,51 +81,30 @@
     readonly placeholder="@iarna/toml output"></textarea>
 </form>
 
+<script>
+  // register this handler immediately for UX purposes
+  document
+    .querySelector('form')
+    .addEventListener('submit', evt => {
+      evt.preventDefault();
+    });
+</script>
+
 <script type="module">
-  import {parse as parseA} from './deno_std/0.92.0/toml.js';
-  import {parse as parseB} from 'https://cdn.skypack.dev/toml@3.0.0';
-  import {parse as parseC} from 'https://cdn.esm.sh/@iarna/toml@2.2.5';
+  import { parse as parseA } from './deno_std/0.92.0/toml.js';
+  import { parse as parseB } from 'https://cdn.skypack.dev/toml@3.0.0';
+  import { parse as parseC } from 'https://cdn.esm.sh/@iarna/toml@2.2.5';
 
-  const inputBox = document.querySelector('[name=input]');
-  const form = document.querySelector('form');
-  const outputs = [
-    [ parseA, document.querySelector('[name=outA]') ],
-    [ parseB, document.querySelector('[name=outB]') ],
-    [ parseC, document.querySelector('[name=outC]') ],
-  ];
+  import { bindFormState, registerParsers } from './form.js';
 
-  function parseNow(raw) {
-    for (const [parse, outbox] of outputs) {
-      Promise.resolve(raw)
-        .then(parse)
-        .then(
-          data => JSON.stringify(data, null, 2),
-          err => err.stack || err)
-        .then(
-          text => outbox.value = text);
-    }
-  }
-
-  form.addEventListener('submit', evt => {
-    evt.preventDefault();
-    window.location.hash = `#${encodeURI(inputBox.value)}`;
+  window.onhashchange = bindFormState({
+    form: document.querySelector('form'),
+    inputBox: document.querySelector('[name=input]'),
+    parseNow: registerParsers([
+      [ parseA, document.querySelector('[name=outA]') ],
+      [ parseB, document.querySelector('[name=outB]') ],
+      [ parseC, document.querySelector('[name=outC]') ],
+    ]),
+    location: window.location,
   });
-
-  inputBox.focus();
-  inputBox.addEventListener('paste', evt => {
-    inputBox.value = '';
-    window.location.hash = `#${encodeURI(evt.clipboardData.getData('text'))}`;
-  });
-
-  function readHash(andSetInput) {
-    const {hash} = window.location;
-    if (hash?.length > 1) {
-      const input = decodeURI(hash.slice(1));
-      inputBox.value = input;
-      parseNow(input);
-    }
-  }
-  window.onhashchange = readHash;
-  readHash(true);
-
 </script>
